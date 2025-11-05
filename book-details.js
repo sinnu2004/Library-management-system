@@ -15,6 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('book-year').textContent = book.year;
     document.getElementById('book-description').textContent = book.description;
 
+    const t = new Date();
+    const format = t.toLocaleString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    book.borrowedAt = format;
     const borrow = document.getElementById('borrow-btn');
     borrow.addEventListener('click', () => {
         let borrowed = JSON.parse(localStorage.getItem('borrowedBooks')) || [];

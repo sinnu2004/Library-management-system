@@ -1,5 +1,6 @@
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded', () => {
 
+    /* -------- Local book data -------- */
     const popular = [
         {
             id: 1,
@@ -38,7 +39,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const novel = [
         {
             id: 1,
-            title : 'The Heart Hollow',
+            title: 'The Heart Hollow',
             images: 'images/heart.jpeg',
             author: 'fyadar dovetesky',
             description: 'A Love Novel',
@@ -68,8 +69,9 @@ document.addEventListener('DOMContentLoaded',()=>{
             description: 'A Lost God conquered Again',
             year: 2025
         }
-    ]
+    ];
 
+    /* -------- Display local books on homepage -------- */
     const grid = document.getElementById('popular-grid-container');
     popular.forEach(p => {
         const b = document.createElement('div');
@@ -78,7 +80,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
         grid.appendChild(b);
         b.querySelector('.book-img').addEventListener('click', () => {
-            localStorage.setItem('selectedBook',JSON.stringify(p));
+            localStorage.setItem('selectedBook', JSON.stringify(p));
             window.location.href = 'book-details.html';
         });
     });
@@ -90,36 +92,92 @@ document.addEventListener('DOMContentLoaded',()=>{
         b.innerHTML = `<div class="novel-grid"><img id="img-grid" class="book-img" src="${p.images}" alt="book-img"><br>${p.author}</div>`;
         novel_grid.appendChild(b);
         b.querySelector('.book-img').addEventListener('click', () => {
-            localStorage.setItem('selectedBook',JSON.stringify(p));
+            localStorage.setItem('selectedBook', JSON.stringify(p));
             window.location.href = 'book-details.html';
-        })
+        });
     });
 
+    /* -------- Combine all local books -------- */
     const allbooks = [...popular, ...novel];
 
+    /* -------- Fetch from Google Books API -------- */
+    async function fetchBooks(query) {
+        const key = `books_${query.toLowerCase()}`;
+
+        // Try to load from cache
+        const cached = localStorage.getItem(key);
+        if (cached) {
+            const data = JSON.parse(cached);
+            if (Date.now() - data.timestamp < 24 * 60 * 60 * 1000) { // 24 hours
+                console.log("Loaded from cache:", query);
+                return data.results;
+            }
+        }
+
+        // Fetch new data from Google Books API
+        const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=10`;
+
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (!data.items) return [];
+
+            const results = data.items.map((item, index) => ({
+                id: Date.now() + index, // unique id
+                title: item.volumeInfo.title || "No Title",
+                author: (item.volumeInfo.authors && item.volumeInfo.authors[0]) || "Unknown",
+                images: (item.volumeInfo.imageLinks && item.volumeInfo.imageLinks.thumbnail) || "images/default.jpg",
+                description: item.volumeInfo.description || "No description available.",
+                year: item.volumeInfo.publishedDate ? item.volumeInfo.publishedDate.slice(0, 4) : "N/A"
+            }));
+
+            // Save to cache
+            localStorage.setItem(key, JSON.stringify({
+                timestamp: Date.now(),
+                results: results
+            }));
+
+            console.log("Fetched from API:", query);
+            return results;
+        } catch (error) {
+            console.error("Error fetching from API:", error);
+            return [];
+        }
+    }
+
+    /* -------- Search logic (local + API) -------- */
     const searchbar = document.getElementById('search-bar');
     const suggestions = document.getElementById('suggestions');
 
-    searchbar.addEventListener('input', () => {
+    searchbar.addEventListener('input', async () => {
         const query = searchbar.value.toLowerCase().trim();
         suggestions.innerHTML = '';
 
-        if(query === '') {
+        if (query === '') {
             suggestions.style.display = 'none';
             return;
         }
 
-        const result = allbooks.filter(p => 
-            p.title.toLowerCase().includes(query) || 
-            p.author.toLowerCase().includes(query) || 
+        // Local search
+        const localResults = allbooks.filter(p =>
+            p.title.toLowerCase().includes(query) ||
+            p.author.toLowerCase().includes(query) ||
             p.year.toString().includes(query)
         );
 
-        if(result.length > 0) {
+        // API search
+        const apiResults = await fetchBooks(query);
+
+        // Merge results
+        const results = [...localResults, ...apiResults];
+
+        // Show results
+        if (results.length > 0) {
             suggestions.style.display = 'block';
-            result.forEach(book => {
+            results.forEach(book => {
                 const div = document.createElement('div');
-                div.className = 'suggetions'
+                div.className = 'suggestions';
                 div.style.padding = '8px';
                 div.style.cursor = 'pointer';
                 div.style.width = '200px';
@@ -131,8 +189,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                     window.location.href = 'book-details.html';
                 });
             });
-        }
-        else {
+        } else {
             suggestions.style.display = 'block';
             const div = document.createElement('div');
             div.style.padding = '8px';
@@ -141,25 +198,35 @@ document.addEventListener('DOMContentLoaded',()=>{
         }
     });
 
+    /* -------- Hide suggestions on outside click -------- */
     document.addEventListener('click', (e) => {
-        if(!e.target.closest('.search-container')) {
+        if (!e.target.closest('.search-container')) {
             suggestions.style.display = 'none';
         }
     });
 
-    searchbar.addEventListener('keydown', (e) => {
-        if(e.key === 'Enter') {
+    /* -------- Search by Enter key -------- */
+    searchbar.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter') {
             const query = searchbar.value.toLowerCase().trim();
-            const result = allbooks.find(books =>
+
+            // Check in local books first
+            let result = allbooks.find(books =>
                 books.title.toLowerCase() === query ||
                 books.author.toLowerCase() === query ||
                 books.year.toString() === query
             );
+
+            // If not found, try API
+            if (!result) {
+                const apiResults = await fetchBooks(query);
+                result = apiResults.length > 0 ? apiResults[0] : null;
+            }
+
             if (result) {
                 localStorage.setItem('selectedBook', JSON.stringify(result));
                 window.location.href = 'book-details.html';
-            } 
-            else {
+            } else {
                 alert('No matching book found.');
             }
         }

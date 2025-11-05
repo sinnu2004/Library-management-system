@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () =>{
     }
 
     borrowed.forEach(book =>{
-        const time = Date.now();
         const list = document.createElement('div');
         list.className = 'book-card';
         list.innerHTML = `<div><img class="book-img" src="${book.images}" alt="${book.title}"></div><table class="detail-table" border="1">
@@ -21,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () =>{
         <td> ${book.title}</td>
         <td> ${book.author}</td>
         <td> ${book.year}</td>
-        <td>${time}</td>
+        <td>${book.borrowedAt}</td>
         </tr></table><div><button class="return-btn">Return</button></div>`;
         container.appendChild(list);
 
