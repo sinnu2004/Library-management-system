@@ -17,6 +17,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const borrow = document.getElementById('borrow-btn');
     borrow.addEventListener('click', () => {
-        alert('This feature is under updation!');
+        let borrowed = JSON.parse(localStorage.getItem('borrowedBooks')) || [];
+
+        const exist = borrowed.some(b => b.id===book.id);
+        if(exist) {
+            alert('you have already borrowed this book');
+            return;
+        }
+        borrowed.push(book);
+        localStorage.setItem('borrowedBooks',JSON.stringify(borrowed));
+        alert('Book added to My Books');
+        window.location.href = 'my-book.html';
     });
+
+    const back = document.getElementById('back-btn');
+    back.addEventListener('click', ()=>{
+        window.location.href = 'index.html';
+    })
 });

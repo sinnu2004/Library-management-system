@@ -150,7 +150,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     searchbar.addEventListener('keydown', (e) => {
         if(e.key === 'Enter') {
             const query = searchbar.value.toLowerCase().trim();
-            // ✅ Use allbooks instead of undefined 'p'
             const result = allbooks.find(books =>
                 books.title.toLowerCase() === query ||
                 books.author.toLowerCase() === query ||
