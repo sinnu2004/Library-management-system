@@ -27,21 +27,25 @@ document.addEventListener('DOMContentLoaded', () => {
     book.borrowedAt = format;
     const borrow = document.getElementById('borrow-btn');
     borrow.addEventListener('click', () => {
-        let borrowed = JSON.parse(localStorage.getItem('borrowedBooks')) || [];
+    let requests = JSON.parse(localStorage.getItem('borrowRequests')) || [];
 
-        const exist = borrowed.some(b => b.id===book.id);
-        if(exist) {
-            alert('you have already borrowed this book');
-            return;
-        }
-        borrowed.push(book);
-        localStorage.setItem('borrowedBooks',JSON.stringify(borrowed));
-        alert('Book added to My Books');
-        window.location.href = 'my-book.html';
+    const exist = requests.some(b => b.id === book.id);
+    if (exist) {
+        alert('You have already requested this book.');
+        return;
+    }
+
+    const t = new Date().toLocaleString();
+    const request = { ...book, requestedAt: t, status: 'Pending' };
+
+    requests.push(request);
+    localStorage.setItem('borrowRequests', JSON.stringify(requests));
+
+    alert('Borrow request sent!');
     });
 
     const back = document.getElementById('back-btn');
     back.addEventListener('click', ()=>{
         window.location.href = 'index.html';
-    })
+    });
 });

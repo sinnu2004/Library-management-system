@@ -245,3 +245,85 @@ footer {
 }
 
 
+/* login container */
+
+.login-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 75vh;
+}
+
+.login-container {
+    background-color: bisque;
+    width: 40%;
+    border: 1px solid black;
+    border-radius: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 30px;
+    box-shadow: 2px 2px 2px 2px black;
+}
+
+.login-container h1 {
+    margin-top: 20px;
+}
+
+.login-detail {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.login-detail input {
+    height: 35px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+.log-btn {
+    height: 40px;
+    width: 100px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: white;
+    background-color: rgb(197, 58, 58);
+    margin-bottom: 20px;
+}
+
+/* admin container*/
+.admin-main {
+    margin-top: 30px;
+}
+.admin-main h1 {
+    margin: 20px;
+    display: flex;
+    justify-content: center;
+    color: red;
+}
+
+#requests-container {
+    border-bottom: 1px solid white;
+}
+.admin-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.admin-btn {
+    height: 30px;
+    width: 70px;
+    background-color: azure;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.admin-table {
+    margin: 0;
+    width: 500px;
+}
